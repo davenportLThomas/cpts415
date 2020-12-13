@@ -1,0 +1,135 @@
+import networkx as nx
+import numpy as np
+import decimal
+
+fileName = "4.txt"
+
+#important for parsing
+videoList = []
+relatedVideoList = []
+
+#open file and start parsing
+with open(fileName) as f:
+    theFile = f.read().splitlines()
+    print("Number of entries in the file " + str(len(theFile)))
+    for entry in theFile:
+        entryInfo = entry.split()
+        index = -1
+        try:  #this removes the pesky ampersands
+            index = entryInfo.index('&')
+        except:
+            index = -1
+        if index != -1:
+            entryInfo.pop(index)
+            entryInfo.pop(index)
+
+        #adding the data to videoList
+        videoInfo = []
+        if len(entryInfo) > 9:
+            infoLength = 9
+        else:
+            infoLength = len(entryInfo)
+        for i in range(infoLength):
+            videoInfo.append(entryInfo[i])
+        videoList.append(videoInfo)
+
+        #adding the data to relatedVideoList
+        if infoLength == 9:
+            relatedVideos = []
+            relatedVideos.append(entryInfo[0])  # slap the title in the front
+            for i in range(infoLength, len(entryInfo)):
+                relatedVideos.append(entryInfo[i])
+            relatedVideoList.append(relatedVideos)
+
+print("Entries not used due to dirty data: " + str(len(videoList)-len(relatedVideoList)))
+print("% of entries lost: " + str(100 - len(relatedVideoList)/len(videoList)*100))
+
+
+
+
+
+#create the graph and fill it in
+G = nx.DiGraph()
+
+#add nodes
+for x in range(len(relatedVideoList)):
+    G.add_node(relatedVideoList[x][0])
+
+#add edges(this will add more nodes)
+for video in relatedVideoList:
+    for x in range(1, len(video)):
+        G.add_edge(video[0],video[x])
+
+print("Total nodes in the graph: " + str(len(G.nodes)))
+
+#adding rank to each node, this involves...another list? This page rankList will only be the size of the original node placement
+nodeRank = decimal
+nodeRank = 1/len(relatedVideoList)
+print("Starting rank for all nodes: " + str(nodeRank))
+pageRankList = []
+for video in relatedVideoList:
+    pageRankEntry=[]
+    pageRankEntry.append(video[0])
+    pageRankEntry.append(nodeRank)
+    pageRankList.append(pageRankEntry)
+
+print("Page rank size: " + str(len(pageRankList)))
+
+print("Start pageRank algorithm, this may take a while....")
+
+#this is where pageRank starts doing what it needs to, we will only go through the original list of nodes...perhaps?
+assert(len(relatedVideoList)==len(pageRankList)) #this is my sanity check
+dampening = 0.55
+for x in range(1):
+    tempPageRankList = []
+    percent = len(relatedVideoList)/100 #purely for visualization
+    percentCount = 0
+    count = 0
+    for node in relatedVideoList:
+        nodeSum = 0
+        nodeEdges = G.in_edges(node[0])
+        for eachEdge in nodeEdges: #eachEdge[0] is where the pertinent info is stored
+            edgeSum = 0
+            #finding the degree, give it 1 so it doesn't cause divide by 0 error
+            thisEdgeDegree = G.in_degree(eachEdge[0])
+            if thisEdgeDegree < 1:
+                thisEdgeDegree = 1
+            #find the pagerank from the edge nodes
+            try:
+                thisEdgeLocation = pageRankList.index(eachEdge[0])
+                thisEdgeRank = pageRankList[thisEdgeLocation][1]
+            except:
+                thisEdgeRank = nodeRank
+            edgeSum = thisEdgeRank/thisEdgeDegree
+            nodeSum = nodeSum + edgeSum
+        #add the dampening and add to appropriate lists
+        nodeSum = nodeSum * dampening
+        newPageRankEntry = []
+        newPageRankEntry.append(node[0])
+        newPageRankEntry.append(nodeSum)
+        tempPageRankList.append(newPageRankEntry)
+
+        ##this is all for the flash and pizazz
+        count = count + 1
+        #print(count%percent)
+        if (count % percent) < 1:
+            percentCount = percentCount + 1
+            if(percentCount % 1) < 1:
+                print(".", end = '')
+            if(percentCount % 10) < 1:
+                print(percentCount)
+    pageRankList = tempPageRankList.copy()
+    print()
+
+
+###another sanity check
+pageRankSum = 0
+for ranks in pageRankList:
+    pageRankSum = pageRankSum + ranks[1]
+
+print("Page rank sum = " + str(pageRankSum))
+
+pageRankList.sort(key=lambda x: x[1], reverse=True)
+
+for x in range(10):
+    print(pageRankList[x])
