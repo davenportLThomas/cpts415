@@ -1,5 +1,5 @@
 # cpts415
-Pagerank algorithm for Youtube
+Pagerank algorithms for Youtube
 
 
 <<<<<<<<<<<<<<<SERIAL ALGORITHM>>>>>>>>>>>>>>>>>>>>>>
