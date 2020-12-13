@@ -15,4 +15,4 @@ In the script the filenam = "4.txt" needs to be replaced with the file name of t
 
 <<<<<<<<<<<<<<<PARALLEL ALGORITHM>>>>>>>>>>>>>>>>>>>>>>
     
-The parallel algorithm needs the PySpark framework which runs with Jupyter Notebooks. After the Jupyter Notebook is running add in the ParallelPageRank.pynb notebook.
+The parallel algorithm needs the PySpark framework which runs with Jupyter Notebooks. After the Jupyter Notebook is running add in the cpts415ParallelAlgorithms.ipynb notebook.
